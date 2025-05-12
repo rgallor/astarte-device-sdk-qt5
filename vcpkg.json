@@ -1,0 +1,20 @@
+{
+    "name": "astarte-device-sdk-qt5",
+    "version": "1.1.2",
+    "builtin-baseline": "275a29dcdb864aa9ce57042eadf95f4a28482280",
+    "dependencies": [
+        "qt5-base",
+        "mosquitto",
+        "libwebsockets",
+        "pkgconf",
+        {
+            "name": "openssl"
+        }
+    ],
+    "overrides": [
+        {
+            "name": "openssl",
+            "version-string": "1.1.1n#1"
+        }
+    ]
+}

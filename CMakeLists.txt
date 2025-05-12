@@ -1,6 +1,6 @@
-project(astarte-device-sdk-qt5 CXX)
+cmake_minimum_required(VERSION 3.10)
 
-cmake_minimum_required(VERSION 2.8.9)
+project(astarte-device-sdk-qt5 CXX)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules/")
 
@@ -34,7 +34,8 @@ find_package(Qt5 COMPONENTS Core Concurrent Network Test Sql REQUIRED)
 # We need OpenSSL for building the transport library
 find_package(OpenSSL REQUIRED)
 # We need MQTT Client (mosquittopp) for building the transport library
-#pkg_check_modules(MOSQUITTO libmosquittopp REQUIRED)
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(MOSQUITTOPP REQUIRED IMPORTED_TARGET libmosquittopp)
 
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
@@ -47,7 +48,7 @@ endif (ENABLE_ASTARTE_DEVICE_SDK_QT5_TEST_CODEPATHS)
 set(CMAKE_AUTOMOC TRUE)
 set(CMAKE_INCLUDE_CURRENT_DIR TRUE)
 
-add_definitions("-std=gnu++11")
+# add_definitions("-std=gnu++11")
 
 # We want explicit literals all over the place, and fast concat
 add_definitions(-DQT_NO_CAST_FROM_ASCII -DQT_USE_QSTRINGBUILDER)
@@ -191,6 +192,9 @@ set(astartedevicesdk_HDRS
 
 add_library(AstarteDeviceSDKQt5 SHARED ${astartedevicesdk_SRCS})
 
+target_compile_options(AstarteDeviceSDKQt5 PRIVATE /FS)
+target_compile_definitions(AstarteDeviceSDKQt5 PRIVATE ASTARTE_DEVICE_SDK_QT5_LIBRARY BUILDING_HEMERA_QT5_SDK BUILDING_HYPERSPACE_QT5)
+
 set_target_properties(AstarteDeviceSDKQt5 PROPERTIES
                       OUTPUT_NAME AstarteDeviceSDKQt5
                       SOVERSION ${ASTARTE_DEVICE_SDK_QT5_ABI_VERSION}
@@ -198,8 +202,10 @@ set_target_properties(AstarteDeviceSDKQt5 PROPERTIES
                       PUBLIC_HEADER "${astartedevicesdk_HDRS}")
 
 target_link_libraries(AstarteDeviceSDKQt5
-                      Qt5::Core Qt5::Network Qt5::Sql mosquittopp
-                      ${OPENSSL_LIBRARIES})
+                      Qt5::Core Qt5::Network Qt5::Sql
+                      ${OPENSSL_LIBRARIES} PkgConfig::MOSQUITTOPP)
+
+target_include_directories(AstarteDeviceSDKQt5 PRIVATE ${MOSQUITTOPP_INCLUDE_DIRS})
 
 # Install phase
 install(TARGETS AstarteDeviceSDKQt5
@@ -260,12 +266,13 @@ install(FILES astarte-transport/db/migrations/001_create_cachemessages.sql astar
 set(astartedevicesdkexample_SRCS
     astarte-utils/astarte-validate-interface/astarte-validate-interface.cpp
     astarte-utils/ValidateInterfaceOperation.cpp
+    astarte-utils/QJsonSchemaChecker.cpp
 )
 
 add_executable(astarte-validate-interface ${astartedevicesdkexample_SRCS})
 
 target_link_libraries(astarte-validate-interface AstarteDeviceSDKQt5
-                      Qt5::Core mosquittopp mosquitto
+                      Qt5::Core PkgConfig::MOSQUITTOPP
                       ${OPENSSL_LIBRARIES})
 
 install(TARGETS astarte-validate-interface

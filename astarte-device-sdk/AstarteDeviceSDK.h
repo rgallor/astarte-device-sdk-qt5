@@ -1,7 +1,7 @@
 /*
  * This file is part of Astarte.
  *
- * Copyright 2017-2021 Ispirata Srl
+ * Copyright 2017-2025 Ispirata Srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,13 +19,20 @@
 #ifndef ASTARTEDEVICESDK_H
 #define ASTARTEDEVICESDK_H
 
+#if defined(ASTARTE_DEVICE_SDK_QT5_LIBRARY)
+#define ASTARTE_DEVICE_SDK_QT5_EXPORT Q_DECL_EXPORT
+#else
+#define ASTARTE_DEVICE_SDK_QT5_EXPORT Q_DECL_IMPORT
+#endif
+
 #include <HemeraCore/AsyncInitObject>
 
 #include <HyperspaceProducerConsumer/ProducerAbstractInterface>
-#include <astartetransport.h>
 #include <QtCore/QPair>
+#include <astartetransport.h>
 
-namespace Hyperdrive {
+namespace Hyperdrive
+{
 class Interface;
 }
 
@@ -33,14 +40,19 @@ class AstarteGenericConsumer;
 class AstarteGenericProducer;
 class QJsonSchemaChecker;
 
-enum EndpointType { AstarteScalarType, AstarteArrayType };
+enum EndpointType
+{
+    AstarteScalarType,
+    AstarteArrayType
+};
 
-class AstarteDeviceSDK : public Hemera::AsyncInitObject
+class ASTARTE_DEVICE_SDK_QT5_EXPORT AstarteDeviceSDK : public Hemera::AsyncInitObject
 {
     Q_OBJECT
 
 public:
-    enum ConnectionStatus {
+    enum ConnectionStatus
+    {
         UnknownStatus = Hyperdrive::AstarteTransport::UnknownStatus,
         DisconnectedStatus = Hyperdrive::AstarteTransport::DisconnectedStatus,
         ConnectedStatus = Hyperdrive::AstarteTransport::ConnectedStatus,
@@ -51,22 +63,24 @@ public:
     Q_ENUM(AstarteDeviceSDK::ConnectionStatus)
 
     AstarteDeviceSDK(const QString &configurationPath, const QString &interfacesDir,
-                     const QByteArray &hardwareId, QObject *parent = nullptr);
+        const QByteArray &hardwareId, QObject *parent = nullptr);
     ~AstarteDeviceSDK();
 
     bool sendData(const QByteArray &interface, const QByteArray &path, const QVariant &value,
-            const QDateTime &timestamp = QDateTime(), const QVariantHash &metadata = QVariantHash());
+        const QDateTime &timestamp = QDateTime(), const QVariantHash &metadata = QVariantHash());
 
     bool sendData(const QByteArray &interface, const QByteArray &path, const QVariant &value,
-            const QVariantHash &metadata);
+        const QVariantHash &metadata);
 
-    bool sendData(const QByteArray &interface, const QVariantHash &value, const QDateTime &timestamp = QDateTime(),
-            const QVariantHash &metadata = QVariantHash());
+    bool sendData(const QByteArray &interface, const QVariantHash &value,
+        const QDateTime &timestamp = QDateTime(), const QVariantHash &metadata = QVariantHash());
 
-    bool sendData(const QByteArray &interface, const QVariantHash &value, const QVariantHash &metadata);
+    bool sendData(
+        const QByteArray &interface, const QVariantHash &value, const QVariantHash &metadata);
 
-    template <typename T> bool sendData(const QByteArray &interface, const QByteArray &path, const QList<T> &value,
-            const QDateTime &timestamp = QDateTime(), const QVariantHash &metadata = QVariantHash());
+    template <typename T>
+    bool sendData(const QByteArray &interface, const QByteArray &path, const QList<T> &value,
+        const QDateTime &timestamp = QDateTime(), const QVariantHash &metadata = QVariantHash());
 
     bool sendUnset(const QByteArray &interface, const QByteArray &path);
 
